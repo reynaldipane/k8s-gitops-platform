@@ -77,7 +77,7 @@ resource "aws_route_table_association" "public" {
 resource "aws_eip" "nat" {
   domain = "vpc"
 
- # KodeKloud playground: an AWS Config rule releases unattached EIPs within seconds.
+  # KodeKloud playground: an AWS Config rule releases unattached EIPs within seconds.
   # Create the EIP only once everything the NAT needs exists, so it's attached right away.
   depends_on = [aws_internet_gateway.main, aws_subnet.public]
 
