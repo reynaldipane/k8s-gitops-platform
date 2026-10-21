@@ -52,14 +52,14 @@ resource "aws_security_group" "control_plane" {
   vpc_id      = aws_vpc.main.id
 
   tags = {
-    Name = "{$var.project_name}-control-plane"
+    Name = "${var.project_name}-control-plane"
   }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "control_plane_api" {
   security_group_id            = aws_security_group.control_plane.id
   description                  = "kube-apiserver from nodes"
-  referenced_security_group_id = aws_security_group.control_plane.id
+  referenced_security_group_id = aws_security_group.node.id
 
   ip_protocol = "tcp"
   from_port   = 6443
