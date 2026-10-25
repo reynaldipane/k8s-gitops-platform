@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euxo pipefail
+
+${node_prep}
+
+# --- Worker: wait for the join command, then join ---
+set +x   # keep the token out of the log
+JOIN_COMMAND=""
+for attempt in $(seq 1 90); do
+  if JOIN_COMMAND=$(aws ssm get-parameter --region ${aws_region} --name ${join_parameter} \
+      --with-decryption --query Parameter.Value --output text 2>/dev/null); then
+    break
+  fi
+  echo "Join command not published yet (attempt $attempt/90), retrying in 10s"
+  sleep 10
+done
+
+if [ -z "$JOIN_COMMAND" ]; then
+  echo "ERROR: no join command after 15 minutes. Check the control plane's cloud-init log." >&2
+  exit 1
+fi
+
+$JOIN_COMMAND
+set -x
+echo "Joined the cluster"
