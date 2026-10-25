@@ -21,3 +21,21 @@ variable "node_instance_type" {
   type        = string
   default     = "t3.medium"
 }
+
+variable "kube_minor" {
+  description = "Kubernetes minor version (pkgs.k8s.io repo)"
+  type        = string
+  default     = "v1.36"
+}
+
+variable "calico_version" {
+  description = "Calico release for the Tigera operator manifests"
+  type        = string
+  default     = "v3.33.0"
+}
+
+variable "pod_cidr" {
+  description = "Pod network CIDR (must not overlap the VPC)"
+  type        = string
+  default     = "192.168.0.0/16"
+}

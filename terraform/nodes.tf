@@ -14,6 +14,12 @@ locals {
     worker-1 = "a"
     worker-2 = "b"
   }
+
+  join_parameter = "/${var.project_name}/join-command"
+
+  node_prep = templatefile("${path.module}/../scripts/node-prep.sh.tftpl", {
+    kube_minor = var.kube_minor
+  })
 }
 
 resource "aws_instance" "control_plane" {
@@ -33,11 +39,21 @@ resource "aws_instance" "control_plane" {
   }
 
   # Boot only after the private subnets route to the NAT
-  depends_on = [aws_route_table_association.private]
+  depends_on = [aws_route_table_association.private, aws_iam_role_policy.node_join_parameter]
 
   tags = {
     Name = "${var.project_name}-control-plane"
   }
+
+  user_data = templatefile("${path.module}/../scripts/control-plane.sh.tftpl", {
+    node_prep      = local.node_prep
+    pod_cidr       = var.pod_cidr
+    calico_version = var.calico_version
+    aws_region     = var.aws_region
+    join_parameter = local.join_parameter
+  })
+
+  user_data_replace_on_change = true
 }
 
 resource "aws_instance" "worker" {
@@ -63,4 +79,12 @@ resource "aws_instance" "worker" {
   tags = {
     Name = "${var.project_name}-${each.key}"
   }
+
+  user_data = templatefile("${path.module}/../scripts/worker.sh.tftpl", {
+    node_prep      = local.node_prep
+    aws_region     = var.aws_region
+    join_parameter = local.join_parameter
+  })
+
+  user_data_replace_on_change = true
 }
