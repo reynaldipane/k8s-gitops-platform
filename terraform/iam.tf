@@ -35,8 +35,14 @@ data "aws_iam_policy_document" "node_join_parameter" {
   }
 }
 
-resource "aws_iam_role_policy" "node_join_parameter" {
-  name   = "join-parameter"
-  role   = aws_iam_role.node.id
+resource "aws_iam_policy" "node_join_parameter" {
+  provider = aws.untagged
+
+  name   = "${var.project_name}-join-parameter"
   policy = data.aws_iam_policy_document.node_join_parameter.json
+}
+
+resource "aws_iam_role_policy_attachment" "node_join_parameter" {
+  role       = aws_iam_role.node.name
+  policy_arn = aws_iam_policy.node_join_parameter.arn
 }

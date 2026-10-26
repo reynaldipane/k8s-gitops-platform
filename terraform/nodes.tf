@@ -39,7 +39,7 @@ resource "aws_instance" "control_plane" {
   }
 
   # Boot only after the private subnets route to the NAT
-  depends_on = [aws_route_table_association.private, aws_iam_role_policy.node_join_parameter]
+  depends_on = [aws_route_table_association.private, aws_iam_role_policy_attachment.node_join_parameter]
 
   tags = {
     Name = "${var.project_name}-control-plane"
