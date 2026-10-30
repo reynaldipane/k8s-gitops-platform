@@ -21,3 +21,7 @@ output "control_plane_id" {
 output "worker_ids" {
   value = { for name, w in aws_instance.worker : name => w.id }
 }
+
+output "ecr_repository_url" {
+  value = aws_ecr_repository.app.repository_url
+}
