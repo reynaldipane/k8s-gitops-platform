@@ -14,7 +14,7 @@ kubectl create -f $CALICO_URL/operator-crds.yaml
 kubectl create -f $CALICO_URL/tigera-operator.yaml
 kubectl wait --for=condition=Established crd --all --timeout=120s
 
-curl -fsSL -o /root/custom-resources.yaml $CALICO_URL/custom-resources.yaml
+curl $CURL_OPTS -o /root/custom-resources.yaml $CALICO_URL/custom-resources.yaml
 sed -i 's/encapsulation: VXLANCrossSubnet/encapsulation: VXLAN/' /root/custom-resources.yaml
 sed -i 's/^\( *\)calicoNetwork:$/&\n\1  bgp: Disabled/' /root/custom-resources.yaml
 grep -q 'encapsulation: VXLAN$' /root/custom-resources.yaml

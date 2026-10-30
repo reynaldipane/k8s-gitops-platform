@@ -1,6 +1,9 @@
 export DEBIAN_FRONTEND=noninteractive
 APT_OPTS="-o DPkg::Lock::Timeout=300"
 
+# Internet downloads: fail each try fast, and retry instead of killing the bootstrap
+CURL_OPTS="-fsSL --retry 5 --retry-delay 5 --retry-all-errors --connect-timeout 10"
+
 # Kernel modules + sysctl
 cat <<EOF > /etc/modules-load.d/k8s.conf
 overlay
@@ -28,8 +31,10 @@ systemctl enable containerd
 
 # kubeadm, kubelet, kubectl
 apt-get $APT_OPTS install -y apt-transport-https ca-certificates curl gpg
-curl -fsSL https://pkgs.k8s.io/core:/stable:/${kube_minor}/deb/Release.key \
-  | gpg --batch --yes --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+curl $CURL_OPTS -o /tmp/kubernetes-release.key \
+  https://pkgs.k8s.io/core:/stable:/${kube_minor}/deb/Release.key
+gpg --batch --yes --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes-release.key
+
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${kube_minor}/deb/ /" \
   > /etc/apt/sources.list.d/kubernetes.list
 apt-get $APT_OPTS update
